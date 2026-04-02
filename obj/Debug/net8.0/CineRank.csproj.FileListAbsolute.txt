@@ -135,3 +135,4 @@ C:\Dev\Projetos_Pessoais\CineRank\obj\Debug\net8.0\refint\CineRank.dll
 C:\Dev\Projetos_Pessoais\CineRank\obj\Debug\net8.0\CineRank.pdb
 C:\Dev\Projetos_Pessoais\CineRank\obj\Debug\net8.0\CineRank.genruntimeconfig.cache
 C:\Dev\Projetos_Pessoais\CineRank\obj\Debug\net8.0\ref\CineRank.dll
+C:\Dev\Projetos_Pessoais\CineRank\obj\Debug\net8.0\CineRank.sourcelink.json

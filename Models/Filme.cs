@@ -16,18 +16,9 @@ namespace CineRank.Models
         public int GeneroId { get; set; }
         public Genero? Genero { get; set; }
 
-        public int DiretorId { get; set; }
-        public Pessoa? Diretor { get; set; }
-
-        public Double NotaHistoria { get; set; }
-        public Double NotaEmocao { get; set; }
-        public Double NotaDirecao { get; set; }
-        public Double NotaTrilha { get; set; }
-        public Double NotaVisual { get; set; }
-
-        public Double NotaFinal { get{ return (NotaHistoria * 4 + NotaEmocao * 3 + NotaDirecao * 2 + NotaTrilha * 1 + NotaVisual * 1) / 11; } }
-   
-        public ICollection<Plataforma>? Plataformas { get; set; }
-        public ICollection<Pessoa>? Atores { get; set; }
+        public ICollection<Avaliacao>? Avaliacoes { get; set; } = new List<Avaliacao>();
+        public ICollection<Credito>? Creditos { get; set; }
+         public ICollection<Plataforma>? Plataformas { get; set; }
+         
     }
 }

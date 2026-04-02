@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using CineRank.Models;
 
 namespace CineRank.DTOs
 {
@@ -17,29 +18,12 @@ namespace CineRank.DTOs
         [Required]
         public string CapaUrl { get; set; } = string.Empty;
         [Required]
+        [Range(1888, 2100, ErrorMessage = "O ano de lançamento deve ser entre 1888 e 2100.")]
         public int AnoLancamento { get; set; }
         [Required]
-
         public int GeneroId { get; set; }
-        [Required]
-        public int DiretorId { get; set; }
-        [Required]
-        [Range(0, 10, ErrorMessage = "A nota deve estar entre 0 e 10.")]
-        public Double NotaHistoria { get; set; }
-        [Required]
-        [Range(0, 10)]
-        public Double NotaEmocao { get; set; }
-        [Required]
-        [Range(0, 10)]
-        public Double NotaDirecao { get; set; }
-        [Required]
-        [Range(0, 10)]
-        public Double NotaTrilha { get; set; }
-        [Required]
-        [Range(0, 10)]
-        public Double NotaVisual { get; set; }
-
+        public List<FilmeCreditoDTO> Creditos { get; set; } = new List<FilmeCreditoDTO>();
         public List<int>? PlataformaIds { get; set; }
-        public List<int>? AtorIds { get; set; }
+        
     }
 }

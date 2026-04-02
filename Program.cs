@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using CineRank.Data; // Ajuste para o namespace real da sua pasta Data
+using CineRank.Data;
+using CineRank.Services; // Ajuste para o namespace real da sua pasta Data
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao")));
 
-// 2. Adiciona serviços ao contêiner (Controllers e Swagger)
+// 2. Registrar os Services para Injeção de Dependência
+builder.Services.AddScoped<FilmeService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<AvaliacaoService>();
+
+// 3. Adiciona serviços ao contêiner (Controllers e Swagger)
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -20,7 +26,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 3. Configura o pipeline de requisições HTTP
+// 4. Configura o pipeline de requisições HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

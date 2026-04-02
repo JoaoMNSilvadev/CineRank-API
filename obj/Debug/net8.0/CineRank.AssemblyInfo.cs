@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CineRank")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+66e71e510e9c158447713d77aabf366bf6ee160d")]
 [assembly: System.Reflection.AssemblyProductAttribute("CineRank")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CineRank")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

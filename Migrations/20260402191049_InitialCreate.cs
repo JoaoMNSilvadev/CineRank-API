@@ -6,11 +6,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CineRank.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Funcoes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Funcoes", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Generos",
                 columns: table => new
@@ -56,6 +69,21 @@ namespace CineRank.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Usuarios",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Senha = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Usuarios", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Filmes",
                 columns: table => new
                 {
@@ -65,13 +93,7 @@ namespace CineRank.Migrations
                     Sinopse = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CapaUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AnoLancamento = table.Column<int>(type: "int", nullable: false),
-                    GeneroId = table.Column<int>(type: "int", nullable: false),
-                    DiretorId = table.Column<int>(type: "int", nullable: false),
-                    NotaHistoria = table.Column<double>(type: "float", nullable: false),
-                    NotaEmocao = table.Column<double>(type: "float", nullable: false),
-                    NotaDirecao = table.Column<double>(type: "float", nullable: false),
-                    NotaTrilha = table.Column<double>(type: "float", nullable: false),
-                    NotaVisual = table.Column<double>(type: "float", nullable: false)
+                    GeneroId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -82,33 +104,69 @@ namespace CineRank.Migrations
                         principalTable: "Generos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Filmes_Pessoas_DiretorId",
-                        column: x => x.DiretorId,
-                        principalTable: "Pessoas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "FilmeAtores",
+                name: "Avaliacoes",
                 columns: table => new
                 {
-                    AtoresId = table.Column<int>(type: "int", nullable: false),
-                    FilmesAtorId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NotaHistoria = table.Column<double>(type: "float", nullable: false),
+                    NotaEmocao = table.Column<double>(type: "float", nullable: false),
+                    NotaDirecao = table.Column<double>(type: "float", nullable: false),
+                    NotaTrilha = table.Column<double>(type: "float", nullable: false),
+                    NotaVisual = table.Column<double>(type: "float", nullable: false),
+                    FilmeId = table.Column<int>(type: "int", nullable: false),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false),
+                    NotaFinal = table.Column<double>(type: "float", nullable: false),
+                    DataAvaliacao = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FilmeAtores", x => new { x.AtoresId, x.FilmesAtorId });
+                    table.PrimaryKey("PK_Avaliacoes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FilmeAtores_Filmes_FilmesAtorId",
-                        column: x => x.FilmesAtorId,
+                        name: "FK_Avaliacoes_Filmes_FilmeId",
+                        column: x => x.FilmeId,
                         principalTable: "Filmes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_FilmeAtores_Pessoas_AtoresId",
-                        column: x => x.AtoresId,
+                        name: "FK_Avaliacoes_Usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Creditos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PessoaId = table.Column<int>(type: "int", nullable: false),
+                    FuncaoId = table.Column<int>(type: "int", nullable: false),
+                    FilmeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Creditos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Creditos_Filmes_FilmeId",
+                        column: x => x.FilmeId,
+                        principalTable: "Filmes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Creditos_Funcoes_FuncaoId",
+                        column: x => x.FuncaoId,
+                        principalTable: "Funcoes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Creditos_Pessoas_PessoaId",
+                        column: x => x.PessoaId,
                         principalTable: "Pessoas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -139,19 +197,34 @@ namespace CineRank.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_FilmeAtores_FilmesAtorId",
-                table: "FilmeAtores",
-                column: "FilmesAtorId");
+                name: "IX_Avaliacoes_FilmeId",
+                table: "Avaliacoes",
+                column: "FilmeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Avaliacoes_UsuarioId",
+                table: "Avaliacoes",
+                column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Creditos_FilmeId",
+                table: "Creditos",
+                column: "FilmeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Creditos_FuncaoId",
+                table: "Creditos",
+                column: "FuncaoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Creditos_PessoaId",
+                table: "Creditos",
+                column: "PessoaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FilmePlataforma_PlataformasId",
                 table: "FilmePlataforma",
                 column: "PlataformasId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Filmes_DiretorId",
-                table: "Filmes",
-                column: "DiretorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Filmes_GeneroId",
@@ -163,10 +236,22 @@ namespace CineRank.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "FilmeAtores");
+                name: "Avaliacoes");
+
+            migrationBuilder.DropTable(
+                name: "Creditos");
 
             migrationBuilder.DropTable(
                 name: "FilmePlataforma");
+
+            migrationBuilder.DropTable(
+                name: "Usuarios");
+
+            migrationBuilder.DropTable(
+                name: "Funcoes");
+
+            migrationBuilder.DropTable(
+                name: "Pessoas");
 
             migrationBuilder.DropTable(
                 name: "Filmes");
@@ -176,9 +261,6 @@ namespace CineRank.Migrations
 
             migrationBuilder.DropTable(
                 name: "Generos");
-
-            migrationBuilder.DropTable(
-                name: "Pessoas");
         }
     }
 }

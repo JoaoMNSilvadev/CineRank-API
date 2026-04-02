@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace CineRank.Models
 {
-    public class Ator : Pessoa
+    public class Funcao
     {
-        public ICollection<Filme>? Filmes { get; set; }
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
     }
 }

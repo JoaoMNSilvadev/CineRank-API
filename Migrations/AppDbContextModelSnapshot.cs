@@ -22,6 +22,78 @@ namespace CineRank.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CineRank.Models.Avaliacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataAvaliacao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FilmeId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("NotaDirecao")
+                        .HasColumnType("float");
+
+                    b.Property<double>("NotaEmocao")
+                        .HasColumnType("float");
+
+                    b.Property<double>("NotaFinal")
+                        .HasColumnType("float");
+
+                    b.Property<double>("NotaHistoria")
+                        .HasColumnType("float");
+
+                    b.Property<double>("NotaTrilha")
+                        .HasColumnType("float");
+
+                    b.Property<double>("NotaVisual")
+                        .HasColumnType("float");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FilmeId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Avaliacoes");
+                });
+
+            modelBuilder.Entity("CineRank.Models.Credito", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FilmeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FuncaoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PessoaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FilmeId");
+
+                    b.HasIndex("FuncaoId");
+
+                    b.HasIndex("PessoaId");
+
+                    b.ToTable("Creditos");
+                });
+
             modelBuilder.Entity("CineRank.Models.Filme", b =>
                 {
                     b.Property<int>("Id")
@@ -37,26 +109,8 @@ namespace CineRank.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DiretorId")
-                        .HasColumnType("int");
-
                     b.Property<int>("GeneroId")
                         .HasColumnType("int");
-
-                    b.Property<double>("NotaDirecao")
-                        .HasColumnType("float");
-
-                    b.Property<double>("NotaEmocao")
-                        .HasColumnType("float");
-
-                    b.Property<double>("NotaHistoria")
-                        .HasColumnType("float");
-
-                    b.Property<double>("NotaTrilha")
-                        .HasColumnType("float");
-
-                    b.Property<double>("NotaVisual")
-                        .HasColumnType("float");
 
                     b.Property<string>("Sinopse")
                         .IsRequired()
@@ -68,11 +122,26 @@ namespace CineRank.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DiretorId");
-
                     b.HasIndex("GeneroId");
 
                     b.ToTable("Filmes");
+                });
+
+            modelBuilder.Entity("CineRank.Models.Funcao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Funcoes");
                 });
 
             modelBuilder.Entity("CineRank.Models.Genero", b =>
@@ -145,19 +214,29 @@ namespace CineRank.Migrations
                     b.ToTable("Plataformas");
                 });
 
-            modelBuilder.Entity("FilmePessoa", b =>
+            modelBuilder.Entity("CineRank.Models.Usuario", b =>
                 {
-                    b.Property<int>("AtoresId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("FilmesAtorId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.HasKey("AtoresId", "FilmesAtorId");
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("FilmesAtorId");
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("FilmeAtores", (string)null);
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("FilmePlataforma", b =>
@@ -175,38 +254,61 @@ namespace CineRank.Migrations
                     b.ToTable("FilmePlataforma");
                 });
 
-            modelBuilder.Entity("CineRank.Models.Filme", b =>
+            modelBuilder.Entity("CineRank.Models.Avaliacao", b =>
                 {
-                    b.HasOne("CineRank.Models.Pessoa", "Diretor")
-                        .WithMany("FilmesDiretor")
-                        .HasForeignKey("DiretorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("CineRank.Models.Filme", "Filme")
+                        .WithMany("Avaliacoes")
+                        .HasForeignKey("FilmeId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CineRank.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Filme");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("CineRank.Models.Credito", b =>
+                {
+                    b.HasOne("CineRank.Models.Filme", "Filme")
+                        .WithMany("Creditos")
+                        .HasForeignKey("FilmeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CineRank.Models.Funcao", "Funcao")
+                        .WithMany()
+                        .HasForeignKey("FuncaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CineRank.Models.Pessoa", "Pessoa")
+                        .WithMany("Creditos")
+                        .HasForeignKey("PessoaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Filme");
+
+                    b.Navigation("Funcao");
+
+                    b.Navigation("Pessoa");
+                });
+
+            modelBuilder.Entity("CineRank.Models.Filme", b =>
+                {
                     b.HasOne("CineRank.Models.Genero", "Genero")
                         .WithMany("Filmes")
                         .HasForeignKey("GeneroId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Diretor");
-
                     b.Navigation("Genero");
-                });
-
-            modelBuilder.Entity("FilmePessoa", b =>
-                {
-                    b.HasOne("CineRank.Models.Pessoa", null)
-                        .WithMany()
-                        .HasForeignKey("AtoresId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CineRank.Models.Filme", null)
-                        .WithMany()
-                        .HasForeignKey("FilmesAtorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("FilmePlataforma", b =>
@@ -224,6 +326,13 @@ namespace CineRank.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CineRank.Models.Filme", b =>
+                {
+                    b.Navigation("Avaliacoes");
+
+                    b.Navigation("Creditos");
+                });
+
             modelBuilder.Entity("CineRank.Models.Genero", b =>
                 {
                     b.Navigation("Filmes");
@@ -231,7 +340,7 @@ namespace CineRank.Migrations
 
             modelBuilder.Entity("CineRank.Models.Pessoa", b =>
                 {
-                    b.Navigation("FilmesDiretor");
+                    b.Navigation("Creditos");
                 });
 #pragma warning restore 612, 618
         }

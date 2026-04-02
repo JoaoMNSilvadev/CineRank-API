@@ -15,7 +15,6 @@ namespace CineRank.Models
         public string Nacionalidade { get; set; } = string.Empty;
         public string FotoUrl { get; set; } = string.Empty;
 
-        public ICollection<Filme>? FilmesDiretor { get; set; }
-        public ICollection<Filme>? FilmesAtor { get; set; }
+        public ICollection<Credito>? Creditos { get; set; } = new List<Credito>();
     }
 }

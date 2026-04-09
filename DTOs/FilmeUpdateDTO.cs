@@ -13,7 +13,7 @@ namespace CineRank.DTOs
         public int? AnoLancamento { get; set; }
         public int? GeneroId { get; set; }
         public List<int>? PlataformaIds { get; set; }
-        public List<FilmeCreditoDTO>? Creditos { get; set; }
+        public List<FilmeCreditoInputDTO>? Creditos { get; set; }
 
     }
 }

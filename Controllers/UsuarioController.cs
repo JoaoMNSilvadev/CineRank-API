@@ -38,22 +38,43 @@ namespace CineRank.Controllers
         [HttpGet("{id}")]
         public IActionResult BuscarUsuarioPorId(int id)
         {
-            var usuario = _usuarioService.BuscarUsuarioPorId(id);
-            return Ok(usuario);
+             try
+            {
+                var usuario = _usuarioService.BuscarUsuarioPorId(id);
+                return Ok(usuario);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         [HttpPatch("{id}")]
         public IActionResult AtualizarUsuario(int id, UsuarioUpdateDTO usuarioDTO)
         {
-            _usuarioService.AtualizarUsuario(id, usuarioDTO);
-            return NoContent();
+            try
+            {
+                _usuarioService.AtualizarUsuario(id, usuarioDTO);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeletarUsuario(int id)
         {
-            _usuarioService.DeletarUsuario(id);
-            return NoContent();
+            try
+            {
+                _usuarioService.DeletarUsuario(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
        [HttpPut("trocar-senha/{id}")]

@@ -20,17 +20,31 @@ namespace CineRank.Controllers
         }
 
         [HttpPost]
-        public IActionResult AdicionarOuAtualizarAvaliacao(AvaliacaoCreateDTO dto)
+       [HttpPost]
+public IActionResult AdicionarAvaliacao(AvaliacaoCreateDTO dto)
+{
+    try
+    {
+        _avaliacaoService.AdicionarAvaliacao(dto);
+        return Ok(new { message = "Avaliação adicionada com sucesso." });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
+
+     [HttpPatch("{usuarioId}/{filmeId}")]
+        public IActionResult AtualizarAvaliacao(int usuarioId, int filmeId, AvaliacaoUpdateDTO dto)
         {
-           try
+            try
             {
-                _avaliacaoService.AdicionarOuAtualizarAvaliacao(dto);
-                return Ok(new { message = "Avaliação adicionada ou atualizada com sucesso." });
+                _avaliacaoService.AtualizarAvaliacao(usuarioId, filmeId, dto);
+                return NoContent();
             }
             catch (Exception ex)
             {
-                // Log do erro (ex.Message) pode ser adicionado aqui para diagnóstico
-                return BadRequest(new { error = ex.Message });
+                return NotFound(new { error = ex.Message });
             }
         }
 

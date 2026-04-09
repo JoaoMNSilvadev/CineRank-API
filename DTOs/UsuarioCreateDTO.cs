@@ -8,9 +8,7 @@ namespace CineRank.DTOs
 {
     public class UsuarioCreateDTO
     {
-        [Key]
-        public int Id { get; set; }
-          [Required]
+        [Required]
         [StringLength(100, MinimumLength = 2)]
         public required string Nome { get; set; }
         [Required]

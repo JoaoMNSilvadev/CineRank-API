@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CineRank.Services
@@ -18,61 +16,76 @@ namespace CineRank.Services
         {
             _context = context;
         }
-public List<FilmeSaidaDTO> ListarFilmes(string ordem = "desc")
-{
-    var query = _context.Filmes
-        .Select(f => new FilmeSaidaDTO
+
+        public List<FilmeSaidaDTO> ListarFilmes(string ordem = "desc")
         {
-            Id = f.Id,
-            Titulo = f.Titulo,
-            Sinopse = f.Sinopse,
-            CapaUrl = f.CapaUrl,
-            AnoLancamento = f.AnoLancamento,
-            Genero = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
-            
-            NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any()) 
-                         ? f.Avaliacoes.Average(a => a.NotaFinal) 
-                         : 0,
+            var query = _context.Filmes
+                .Include(f => f.Genero)
+                .Include(f => f.Avaliacoes)
+                .Include(f => f.Creditos!)
+                    .ThenInclude(c => c.Pessoa)
+                .Include(f => f.Creditos!)
+                    .ThenInclude(c => c.Funcao)
+                .Include(f => f.Plataformas)
+                .Select(f => new FilmeSaidaDTO
+                {
+                    Id = f.Id,
+                    Titulo = f.Titulo,
+                    Sinopse = f.Sinopse,
+                    CapaUrl = f.CapaUrl,
+                    AnoLancamento = f.AnoLancamento,
+                    Genero = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
+                    NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any())
+                                 ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1)
+                                 : 0,
+                    Creditos = f.Creditos!.Select(c => new FilmeCreditoDTO
+                    {
+                        PessoaId = c.PessoaId,
+                        NomePessoa = c.Pessoa!.Nome,
+                        FuncaoId = c.FuncaoId,
+                        NomeFuncao = c.Funcao!.Nome
+                    }).ToList(),
+                    PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
+                }).ToList();
 
-            // AQUI É ONDE A MÁGICA ACONTECE:
-            Creditos = f.Creditos!.Select(c => new FilmeCreditoDTO 
-            { 
-                PessoaId = c.PessoaId, 
-                NomePessoa = c.Pessoa!.Nome, // Puxa o nome da tabela Pessoa
-                FuncaoId = c.FuncaoId,
-                NomeFuncao = c.Funcao!.Nome  // Puxa o nome da tabela Funcao
-            }).ToList(),
+            return ordem.ToLower() == "asc"
+                   ? query.OrderBy(f => f.NotaMedia).ToList()
+                   : query.OrderByDescending(f => f.NotaMedia).ToList();
+        }
 
-            // Se quiser os NOMES das plataformas em vez de IDs:
-            PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
-        }).ToList(); 
-
-    query.ForEach(f => f.NotaMedia = Math.Round(f.NotaMedia, 1));
-
-    return ordem.ToLower() == "asc" 
-           ? query.OrderBy(f => f.NotaMedia).ToList() 
-           : query.OrderByDescending(f => f.NotaMedia).ToList();
-}
-
-       public FilmeSaidaDTO? BuscarFilmePorId(int id)
-{
-    return _context.Filmes
-        .Include(f => f.Genero)
-        .Include(f => f.Avaliacoes)
-        .Include(f => f.Creditos!)
-            .ThenInclude(c => c.Pessoa)
-        .Where(f => f.Id == id)
-        .Select(f => new FilmeSaidaDTO
+        public FilmeSaidaDTO? BuscarFilmePorId(int id)
         {
-            Id = f.Id,
-            Titulo = f.Titulo,
-            NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any()) 
-                         ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1) 
-                         : 0,
-            // ... demais campos ...
-        })
-        .FirstOrDefault();
-}
+            return _context.Filmes
+                .Include(f => f.Genero)
+                .Include(f => f.Avaliacoes)
+                .Include(f => f.Creditos!)
+                    .ThenInclude(c => c.Pessoa)
+                .Include(f => f.Creditos!)
+                    .ThenInclude(c => c.Funcao)
+                .Include(f => f.Plataformas)
+                .Where(f => f.Id == id)
+                .Select(f => new FilmeSaidaDTO
+                {
+                    Id = f.Id,
+                    Titulo = f.Titulo,
+                    Sinopse = f.Sinopse,
+                    CapaUrl = f.CapaUrl,
+                    AnoLancamento = f.AnoLancamento,
+                    Genero = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
+                    NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any())
+                                 ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1)
+                                 : 0,
+                    Creditos = f.Creditos!.Select(c => new FilmeCreditoDTO
+                    {
+                        PessoaId = c.PessoaId,
+                        NomePessoa = c.Pessoa!.Nome,
+                        FuncaoId = c.FuncaoId,
+                        NomeFuncao = c.Funcao!.Nome
+                    }).ToList(),
+                    PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
+                })
+                .FirstOrDefault();
+        }
 
         public List<FilmeSaidaDTO> BuscarFilmesPorTitulo(string titulo)
         {
@@ -81,85 +94,111 @@ public List<FilmeSaidaDTO> ListarFilmes(string ordem = "desc")
                 .Include(f => f.Avaliacoes)
                 .Include(f => f.Creditos!)
                     .ThenInclude(c => c.Pessoa)
+                .Include(f => f.Creditos!)
+                    .ThenInclude(c => c.Funcao)
+                .Include(f => f.Plataformas)
                 .Where(f => f.Titulo.Contains(titulo))
                 .Select(f => new FilmeSaidaDTO
                 {
                     Id = f.Id,
                     Titulo = f.Titulo,
-                    NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any()) 
-                                 ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1) 
+                    Sinopse = f.Sinopse,
+                    CapaUrl = f.CapaUrl,
+                    AnoLancamento = f.AnoLancamento,
+                    Genero = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
+                    NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any())
+                                 ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1)
                                  : 0,
-                    // ... demais campos ...
+                    Creditos = f.Creditos!.Select(c => new FilmeCreditoDTO
+                    {
+                        PessoaId = c.PessoaId,
+                        NomePessoa = c.Pessoa!.Nome,
+                        FuncaoId = c.FuncaoId,
+                        NomeFuncao = c.Funcao!.Nome
+                    }).ToList(),
+                    PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
                 })
                 .ToList();
         }
 
-public FilmeSaidaDTO CriarFilme(FilmeCreateDTO dto)
-{
-    var novoFilme = new Filme
-    {
-        Titulo = dto.Titulo,
-        Sinopse = dto.Sinopse,
-        CapaUrl = dto.CapaUrl,
-        AnoLancamento = dto.AnoLancamento,
-        GeneroId = dto.GeneroId,
-        Creditos = dto.Creditos?.Select(c => new Credito 
-        { 
-            PessoaId = c.PessoaId, 
-            FuncaoId = c.FuncaoId 
-        }).ToList() ?? new List<Credito>()
-    };
+        public FilmeSaidaDTO CriarFilme(FilmeCreateDTO dto)
+        {
+            // Carrega pessoas e funções de uma vez — evita N+1 queries
+            var pessoaIds = dto.Creditos.Select(c => c.PessoaId).ToList();
+            var funcaoIds = dto.Creditos.Select(c => c.FuncaoId).ToList();
 
-    // Vincula as entidades de Plataforma ao Filme no banco
-    if (dto.PlataformaIds != null && dto.PlataformaIds.Any())
-    {
-        novoFilme.Plataformas = _context.Plataformas
-            .Where(p => dto.PlataformaIds.Contains(p.Id)).ToList();
-    }
+            var pessoas = _context.Pessoas
+                .Where(p => pessoaIds.Contains(p.Id))
+                .ToDictionary(p => p.Id, p => p.Nome);
 
-    _context.Filmes.Add(novoFilme);
-    _context.SaveChanges(); 
+            var funcoes = _context.Funcoes
+                .Where(f => funcaoIds.Contains(f.Id))
+                .ToDictionary(f => f.Id, f => f.Nome);
 
-    // Busca o nome do gênero corretamente usando o GeneroId do filme criado
-    var nomeGenero = _context.Generos
-        .Where(g => g.Id == novoFilme.GeneroId) 
-        .Select(g => g.NomeGenero)
-        .FirstOrDefault() ?? "Gênero não encontrado";
+            var novoFilme = new Filme
+            {
+                Titulo = dto.Titulo,
+                Sinopse = dto.Sinopse,
+                CapaUrl = dto.CapaUrl,
+                AnoLancamento = dto.AnoLancamento,
+                GeneroId = dto.GeneroId,
+                Creditos = dto.Creditos.Select(c => new Credito
+                {
+                    PessoaId = c.PessoaId,
+                    FuncaoId = c.FuncaoId
+                }).ToList()
+            };
 
-    // Busca os nomes das plataformas para o retorno visual
-    var nomesDasPlataformas = novoFilme.Plataformas?
-        .Select(p => p.NomePlataforma)
-        .ToList() ?? new List<string>();
+            if (dto.PlataformaIds != null && dto.PlataformaIds.Any())
+            {
+                novoFilme.Plataformas = _context.Plataformas
+                    .Where(p => dto.PlataformaIds.Contains(p.Id)).ToList();
+            }
 
-    return new FilmeSaidaDTO 
-    { 
-        Id = novoFilme.Id, 
-        Titulo = novoFilme.Titulo,
-        Sinopse = novoFilme.Sinopse,
-        CapaUrl = novoFilme.CapaUrl,
-        AnoLancamento = novoFilme.AnoLancamento,
-        Genero = nomeGenero,
-        NotaMedia = 0,
-        // Mapeia os créditos para o DTO de saída (incluindo os nomes se você ajustou o DTO)
-        Creditos = novoFilme.Creditos.Select(c => new FilmeCreditoDTO 
-        { 
-            PessoaId = c.PessoaId,
-            NomePessoa = _context.Pessoas.Find(c.PessoaId)?.Nome ?? "N/A",
-            FuncaoId = c.FuncaoId,
-            NomeFuncao = _context.Funcoes.Find(c.FuncaoId)?.Nome ?? "N/A"
-        }).ToList(),
-        PlataformaNomes = nomesDasPlataformas
-    };
-}
+            _context.Filmes.Add(novoFilme);
+            _context.SaveChanges();
+
+            var nomeGenero = _context.Generos
+                .Where(g => g.Id == novoFilme.GeneroId)
+                .Select(g => g.NomeGenero)
+                .FirstOrDefault() ?? "Gênero não encontrado";
+
+            var nomesDasPlataformas = novoFilme.Plataformas?
+                .Select(p => p.NomePlataforma)
+                .ToList() ?? new List<string>();
+
+            return new FilmeSaidaDTO
+            {
+                Id = novoFilme.Id,
+                Titulo = novoFilme.Titulo,
+                Sinopse = novoFilme.Sinopse,
+                CapaUrl = novoFilme.CapaUrl,
+                AnoLancamento = novoFilme.AnoLancamento,
+                Genero = nomeGenero,
+                NotaMedia = 0,
+                Creditos = novoFilme.Creditos.Select(c => new FilmeCreditoDTO
+                {
+                    PessoaId = c.PessoaId,
+                    NomePessoa = pessoas.GetValueOrDefault(c.PessoaId, "N/A"),
+                    FuncaoId = c.FuncaoId,
+                    NomeFuncao = funcoes.GetValueOrDefault(c.FuncaoId, "N/A")
+                }).ToList(),
+                PlataformaNomes = nomesDasPlataformas
+            };
+        }
+
         public void AtualizarFilme(int id, FilmeUpdateDTO filmeDTO)
         {
-            var filme = _context.Filmes.Find(id);
+            var filme = _context.Filmes
+                .Include(f => f.Plataformas)
+                .Include(f => f.Creditos)
+                .FirstOrDefault(f => f.Id == id);
+
             if (filme == null)
                 throw new Exception("Filme não encontrado.");
-                
+
             if (filmeDTO.Titulo != null)
                 filme.Titulo = filmeDTO.Titulo;
-
             if (filmeDTO.Sinopse != null)
                 filme.Sinopse = filmeDTO.Sinopse;
             if (filmeDTO.CapaUrl != null)
@@ -170,22 +209,20 @@ public FilmeSaidaDTO CriarFilme(FilmeCreateDTO dto)
                 filme.GeneroId = filmeDTO.GeneroId.Value;
             if (filmeDTO.PlataformaIds != null)
             {
-                var plataformas = _context.Plataformas
+                filme.Plataformas = _context.Plataformas
                     .Where(p => filmeDTO.PlataformaIds.Contains(p.Id))
                     .ToList();
-                filme.Plataformas = plataformas;
             }
             if (filmeDTO.Creditos != null)
             {
-                var novosCreditos = filmeDTO.Creditos.Select(c => new Credito
+                filme.Creditos = filmeDTO.Creditos.Select(c => new Credito
                 {
                     PessoaId = c.PessoaId,
                     FuncaoId = c.FuncaoId
                 }).ToList();
-                filme.Creditos = novosCreditos;
             }
-            _context.SaveChanges();
 
+            _context.SaveChanges();
         }
 
         public void DeletarFilme(int id)
@@ -197,6 +234,5 @@ public FilmeSaidaDTO CriarFilme(FilmeCreateDTO dto)
             _context.Filmes.Remove(filme);
             _context.SaveChanges();
         }
-
     }
 }

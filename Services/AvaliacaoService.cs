@@ -17,49 +17,59 @@ public class AvaliacaoService
         _context = context;
     }
 
-    public void AdicionarOuAtualizarAvaliacao(AvaliacaoCreateDTO dto)
-    {
-       double calculo = (dto.NotaHistoria * 4 +
-                         dto.NotaEmocao * 3 +
-                         dto.NotaDirecao * 2 +
-                         dto.NotaTrilha * 1 +
-                         dto.NotaVisual * 1) / 11.0;
-
-        double notaFinal = Math.Round(calculo, 2);
-
-        // 2. Verificar se este usuário já avaliou este filme antes
-        var avaliacaoExistente = _context.Avaliacoes
-            .FirstOrDefault(a => a.UsuarioId == dto.UsuarioId && a.FilmeId == dto.FilmeId);
-
-        if (avaliacaoExistente != null)
+   public void AdicionarAvaliacao(AvaliacaoCreateDTO dto)
         {
-            // ATUALIZAÇÃO
-            avaliacaoExistente.NotaHistoria = dto.NotaHistoria;
-            avaliacaoExistente.NotaEmocao = dto.NotaEmocao;
-            avaliacaoExistente.NotaDirecao = dto.NotaDirecao;
-            avaliacaoExistente.NotaTrilha = dto.NotaTrilha;
-            avaliacaoExistente.NotaVisual = dto.NotaVisual;
-            avaliacaoExistente.NotaFinal = notaFinal; // Média atualizada
+            double notaFinal = CalcularNotaFinal(
+                dto.NotaHistoria,
+                dto.NotaEmocao,
+                dto.NotaDirecao,
+                dto.NotaTrilha,
+                dto.NotaVisual
+            );
 
-        }
-        else
-        {
-            // CRIAÇÃO NOVA
-            var novaAvaliacao = new Avaliacao
-            {
-                UsuarioId = dto.UsuarioId,
-                FilmeId = dto.FilmeId,
-                NotaHistoria = dto.NotaHistoria,
-                NotaEmocao = dto.NotaEmocao,
-                NotaDirecao = dto.NotaDirecao,
-                NotaTrilha = dto.NotaTrilha,
-                NotaVisual = dto.NotaVisual,
-                NotaFinal = notaFinal,
-            };
-            _context.Avaliacoes.Add(novaAvaliacao);
+           
+                var novaAvaliacao = new Avaliacao
+                {
+                    UsuarioId    = dto.UsuarioId,
+                    FilmeId      = dto.FilmeId,
+                    NotaHistoria = dto.NotaHistoria,
+                    NotaEmocao   = dto.NotaEmocao,
+                    NotaDirecao  = dto.NotaDirecao,
+                    NotaTrilha   = dto.NotaTrilha,
+                    NotaVisual   = dto.NotaVisual,
+                    NotaFinal    = notaFinal,
+                };
+                _context.Avaliacoes.Add(novaAvaliacao);
+            
+
+            _context.SaveChanges();
         }
 
-        _context.SaveChanges();
+        public void AtualizarAvaliacao(int usuarioId, int filmeId, AvaliacaoUpdateDTO dto)
+        {
+            var avaliacao = _context.Avaliacoes
+                .FirstOrDefault(a => a.UsuarioId == usuarioId && a.FilmeId == filmeId);
+
+            if (avaliacao == null)
+                throw new Exception("Avaliação não encontrada.");
+
+            // Só atualiza os campos que foram enviados — mantém os demais
+            if (dto.NotaHistoria.HasValue) avaliacao.NotaHistoria = dto.NotaHistoria.Value;
+            if (dto.NotaEmocao.HasValue)   avaliacao.NotaEmocao   = dto.NotaEmocao.Value;
+            if (dto.NotaDirecao.HasValue)  avaliacao.NotaDirecao  = dto.NotaDirecao.Value;
+            if (dto.NotaTrilha.HasValue)   avaliacao.NotaTrilha   = dto.NotaTrilha.Value;
+            if (dto.NotaVisual.HasValue)   avaliacao.NotaVisual   = dto.NotaVisual.Value;
+
+            // Sempre recalcula a nota final com os valores atuais
+            avaliacao.NotaFinal = CalcularNotaFinal(
+                avaliacao.NotaHistoria,
+                avaliacao.NotaEmocao,
+                avaliacao.NotaDirecao,
+                avaliacao.NotaTrilha,
+                avaliacao.NotaVisual
+            );
+
+            _context.SaveChanges();
         }
 
         public AvaliacaoSaidaDTO? ObterMinhaAvaliacao(int usuarioId, int filmeId)

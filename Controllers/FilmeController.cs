@@ -26,9 +26,6 @@ namespace CineRank.Controllers
         public IActionResult ObterFilmePorId(int id)
         {
             var filme = _filmeService.BuscarFilmePorId(id);
-            if (filme == null)
-                return NotFound(new { error = "Filme não encontrado." });
-
             return Ok(filme);
         }
 
@@ -56,29 +53,15 @@ namespace CineRank.Controllers
         [HttpPatch("{id}")]
         public IActionResult AtualizarFilme(int id, FilmeUpdateDTO filme)
         {
-            try
-            {
                 _filmeService.AtualizarFilme(id, filme);
                 return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeletarFilme(int id)
         {
-            try
-            {
-                _filmeService.DeletarFilme(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
+            _filmeService.DeletarFilme(id);
+             return NoContent();
         }
     }
 }

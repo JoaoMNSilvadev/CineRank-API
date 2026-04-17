@@ -2,11 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CineRank.DTOs
 {
-    public class UsuarioCreateDTO
+    public class LoginDTO
     {
-        [Required]
-        [StringLength(100, MinimumLength = 2)]
-        public required string Nome { get; set; }
         [Required]
         [EmailAddress]
         public required string Email { get; set; }

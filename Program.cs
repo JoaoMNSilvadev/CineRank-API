@@ -1,32 +1,43 @@
 using Microsoft.EntityFrameworkCore;
 using CineRank.Data;
-using CineRank.Services; // Ajuste para o namespace real da sua pasta Data
+using CineRank.Services;
+using CineRank.Middleware; 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuração do Banco de Dados (O CORAÇÃO DO PROBLEMA)
-// Esta linha resolve o erro "Unable to resolve service..."
+// 1. Configuração do Banco de Dados
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao")));
 
-// 2. Registrar os Services para Injeção de Dependência
+// 2. Services
 builder.Services.AddScoped<FilmeService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AvaliacaoService>();
 
-// 3. Adiciona serviços ao contêiner (Controllers e Swagger)
+// 3. Configuração do CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// 4. Controllers e Swagger
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Esta linha mágica impede o loop infinito
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
 
-// 4. Configura o pipeline de requisições HTTP
+// 5. Configura o pipeline de requisições HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -35,7 +46,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapControllers();
 

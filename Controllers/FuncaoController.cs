@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using CineRank.Data;
 using CineRank.Models;
-using System.Linq;
 
 namespace CineRank.Controllers
 {

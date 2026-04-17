@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
@@ -16,6 +12,17 @@ public class AvaliacaoService
     {
         _context = context;
     }
+
+    private static double CalcularNotaFinal(double historia, double emocao, double direcao, double trilha, double visual)
+        {
+            double calculo = (historia * 4 +
+                              emocao   * 3 +
+                              direcao  * 2 +
+                              trilha   * 1 +
+                              visual   * 1) / 11.0;
+
+            return Math.Round(calculo, 2);
+        }
 
    public void AdicionarAvaliacao(AvaliacaoCreateDTO dto)
         {
@@ -51,7 +58,7 @@ public class AvaliacaoService
                 .FirstOrDefault(a => a.UsuarioId == usuarioId && a.FilmeId == filmeId);
 
             if (avaliacao == null)
-                throw new Exception("Avaliação não encontrada.");
+                throw new KeyNotFoundException("Avaliação não encontrada.");
 
             // Só atualiza os campos que foram enviados — mantém os demais
             if (dto.NotaHistoria.HasValue) avaliacao.NotaHistoria = dto.NotaHistoria.Value;

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
@@ -55,7 +52,7 @@ namespace CineRank.Services
 
         public FilmeSaidaDTO? BuscarFilmePorId(int id)
         {
-            return _context.Filmes
+            var filme = _context.Filmes
                 .Include(f => f.Genero)
                 .Include(f => f.Avaliacoes)
                 .Include(f => f.Creditos!)
@@ -85,6 +82,11 @@ namespace CineRank.Services
                     PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
                 })
                 .FirstOrDefault();
+
+                if (filme == null)
+                throw new KeyNotFoundException("Filme não encontrado.");
+
+            return filme;
         }
 
         public List<FilmeSaidaDTO> BuscarFilmesPorTitulo(string titulo)
@@ -195,7 +197,7 @@ namespace CineRank.Services
                 .FirstOrDefault(f => f.Id == id);
 
             if (filme == null)
-                throw new Exception("Filme não encontrado.");
+                throw new KeyNotFoundException("Filme não encontrado.");
 
             if (filmeDTO.Titulo != null)
                 filme.Titulo = filmeDTO.Titulo;
@@ -229,7 +231,7 @@ namespace CineRank.Services
         {
             var filme = _context.Filmes.Find(id);
             if (filme == null)
-                throw new Exception("Filme não encontrado.");
+                throw new KeyNotFoundException("Filme não encontrado.");
 
             _context.Filmes.Remove(filme);
             _context.SaveChanges();

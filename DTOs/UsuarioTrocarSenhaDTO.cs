@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CineRank.DTOs
 {
@@ -18,5 +14,5 @@ namespace CineRank.DTOs
 
     [Compare("NovaSenha", ErrorMessage = "A confirmação não coincide com a nova senha.")]
     public string ConfirmarNovaSenha { get; set; } = string.Empty;
-}
     }
+}

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using CineRank.Models;
 using CineRank.Data;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]")]

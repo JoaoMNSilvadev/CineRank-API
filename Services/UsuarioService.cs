@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace CineRank.Services
 {
@@ -18,12 +13,17 @@ namespace CineRank.Services
         }
 
         public UsuarioSaidaDTO CriarUsuario(UsuarioCreateDTO usuario)
-        {
+        {   
+            var emailExistente = _context.Usuarios.Any(u => u.Email == usuario.Email);
+            if (emailExistente) {
+                throw new ArgumentException("O email já está em uso por outro usuário.");
+            }
+
             var novoUsuario = new Usuario
             {
                 Nome = usuario.Nome,
                 Email = usuario.Email,
-                Senha = usuario.Senha
+                Senha = BCrypt.Net.BCrypt.HashPassword(usuario.Senha)
             };
             _context.Usuarios.Add(novoUsuario);
             _context.SaveChanges();
@@ -42,7 +42,7 @@ namespace CineRank.Services
 
             if (usuarioExistente == null)
             {
-                throw new Exception("Usuário não encontrado.");
+                throw new KeyNotFoundException("Usuário não encontrado.");
             }
             if (usuarioDTO.Nome != null)
                 usuarioExistente.Nome = usuarioDTO.Nome;
@@ -70,7 +70,7 @@ namespace CineRank.Services
             var usuario = _context.Usuarios.Find(id);
             if (usuario == null)
             {
-                throw new Exception("Usuário não encontrado.");
+                throw new KeyNotFoundException("Usuário não encontrado.");
             }
             return new UsuarioSaidaDTO
             {
@@ -86,7 +86,7 @@ namespace CineRank.Services
 
             if (usuarioExistente == null)
             {
-                throw new Exception("Usuário não encontrado.");
+                throw new KeyNotFoundException("Usuário não encontrado.");
             }
 
             _context.Usuarios.Remove(usuarioExistente);
@@ -99,12 +99,12 @@ namespace CineRank.Services
             var usuario = _context.Usuarios.Find(id);
             if (usuario == null)
             {
-                throw new Exception("Usuário não encontrado.");
+                throw new KeyNotFoundException("Usuário não encontrado.");
             }
 
             if (usuario.Senha != senhaDTO.SenhaAtual)
             {
-                throw new Exception("A senha atual está incorreta.");
+                throw new ArgumentException("A senha atual está incorreta.");
             }
 
             usuario.Senha = senhaDTO.NovaSenha;

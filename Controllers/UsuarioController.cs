@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CineRank.DTOs;
 using CineRank.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CineRank.Data;
 
 namespace CineRank.Controllers
 {
@@ -38,58 +32,30 @@ namespace CineRank.Controllers
         [HttpGet("{id}")]
         public IActionResult BuscarUsuarioPorId(int id)
         {
-             try
-            {
                 var usuario = _usuarioService.BuscarUsuarioPorId(id);
                 return Ok(usuario);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
         }
 
         [HttpPatch("{id}")]
         public IActionResult AtualizarUsuario(int id, UsuarioUpdateDTO usuarioDTO)
         {
-            try
-            {
                 _usuarioService.AtualizarUsuario(id, usuarioDTO);
                 return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
+
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeletarUsuario(int id)
         {
-            try
-            {
                 _usuarioService.DeletarUsuario(id);
                 return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { error = ex.Message });
-            }
         }
 
        [HttpPut("trocar-senha/{id}")]
 public IActionResult TrocarSenha(int id, UsuarioTrocarSenhaDTO trocarSenhaDTO)
 {
-    try 
-    {
         _usuarioService.TrocarSenha(id, trocarSenhaDTO);
         return Ok(new { message = "Senha alterada com sucesso!" });
-    }
-    catch (Exception ex) 
-    {
-        // Em vez de deixar o sistema travar, retornamos o erro como uma mensagem
-        return BadRequest(new { message = ex.Message });
-    }
 }
 
     }

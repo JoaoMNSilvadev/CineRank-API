@@ -14,8 +14,12 @@ namespace CineRank.Services
             _context = context;
         }
 
-        public List<FilmeSaidaDTO> ListarFilmes(string ordem = "desc")
+            public PaginacaoDTO<FilmeSaidaDTO> ListarFilmes(string ordem = "desc", int pagina = 1, int quantidade = 10)
         {
+            if (pagina < 1) pagina = 1;
+            if (quantidade < 1) quantidade = 10;
+            if (quantidade > 50) quantidade = 50;
+
             var query = _context.Filmes
                 .Include(f => f.Genero)
                 .Include(f => f.Avaliacoes)
@@ -26,28 +30,45 @@ namespace CineRank.Services
                 .Include(f => f.Plataformas)
                 .Select(f => new FilmeSaidaDTO
                 {
-                    Id = f.Id,
-                    Titulo = f.Titulo,
-                    Sinopse = f.Sinopse,
-                    CapaUrl = f.CapaUrl,
-                    AnoLancamento = f.AnoLancamento,
-                    Genero = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
-                    NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any())
-                                 ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1)
-                                 : 0,
+                    Id              = f.Id,
+                    Titulo          = f.Titulo,
+                    Sinopse         = f.Sinopse,
+                    CapaUrl         = f.CapaUrl,
+                    AnoLancamento   = f.AnoLancamento,
+                    Genero          = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
+                    NotaMedia       = (f.Avaliacoes != null && f.Avaliacoes.Any())
+                                       ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1)
+                                       : 0,
                     Creditos = f.Creditos!.Select(c => new FilmeCreditoDTO
                     {
-                        PessoaId = c.PessoaId,
+                        PessoaId   = c.PessoaId,
                         NomePessoa = c.Pessoa!.Nome,
-                        FuncaoId = c.FuncaoId,
+                        FuncaoId   = c.FuncaoId,
                         NomeFuncao = c.Funcao!.Nome
                     }).ToList(),
                     PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
-                }).ToList();
+                });
 
-            return ordem.ToLower() == "asc"
-                   ? query.OrderBy(f => f.NotaMedia).ToList()
-                   : query.OrderByDescending(f => f.NotaMedia).ToList();
+                query = ordem.ToLower() == "asc"
+                   ? query.OrderBy(f => f.NotaMedia)
+                   : query.OrderByDescending(f => f.NotaMedia);
+
+                int total = query.Count();
+                int totalPaginas = (int)Math.Ceiling(total / (double)quantidade);
+
+                var dados = query
+                .Skip((pagina - 1) * quantidade)
+                .Take(quantidade)
+                .ToList();
+
+                return new PaginacaoDTO<FilmeSaidaDTO>
+                {
+                    Pagina = pagina,
+                    Quantidade = quantidade,
+                    Total = total,
+                    TotalPaginas = totalPaginas,
+                    Dados = dados
+                };
         }
 
         public FilmeSaidaDTO? BuscarFilmePorId(int id)

@@ -1,6 +1,7 @@
 using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
+using CineRank.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
@@ -9,43 +10,32 @@ namespace CineRank.Controllers
     [Route("api/[controller]")]
     public class PessoasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly PessoaService _pessoaService;
 
-        public PessoasController(AppDbContext context)
+        public PessoasController(PessoaService pessoaService)
         {
-            _context = context;
+            _pessoaService = pessoaService;
         }
 
         [HttpPost]
         public IActionResult CriarPessoa(PessoaCreateDTO pessoa)
         {
-            var novaPessoa = new Pessoa
-            {
-                Nome = pessoa.Nome,
-                Biografia = pessoa.Biografia,
-                DataNascimento = pessoa.DataNascimento,
-                Nacionalidade = pessoa.Nacionalidade,
-                FotoUrl = pessoa.FotoUrl
-            };
-            _context.Pessoas.Add(novaPessoa);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(ObterPessoaPorId),
-             new { id = novaPessoa.Id },
-              novaPessoa);
+            var novaPessoa = _pessoaService.CriarPessoa(pessoa);
+            return CreatedAtAction(nameof(ObterPessoaPorId), new { id = novaPessoa.Id }, novaPessoa);
 
         }
 
         [HttpGet]
-        public IActionResult ListarPessoas()
+        public IActionResult ListarPessoas([FromQuery] int pagina = 1, [FromQuery] int quantidade = 10)
         {
-            var pessoas = _context.Pessoas.ToList();
+            var pessoas = _pessoaService.ListarPessoas(pagina, quantidade);
             return Ok(pessoas);
         }
 
         [HttpGet("{id}")]
         public IActionResult ObterPessoaPorId(int id)
         {
-            var pessoa = _context.Pessoas.Find(id);
+            var pessoa = _pessoaService.ObterPessoaPorId(id);
             if (pessoa == null)
             {
                 return NotFound();
@@ -56,55 +46,21 @@ namespace CineRank.Controllers
         [HttpGet("buscar")]
         public IActionResult BuscarPessoas(string nome)
         {
-            var pessoas = _context.Pessoas.Where(p => p.Nome.Contains(nome)).ToList();
+            var pessoas = _pessoaService.BuscarPessoas(nome);
             return Ok(pessoas);
         }
 
         [HttpPatch("{id}")]
         public IActionResult AtualizarPessoa(int id, PessoaUpdateDTO pessoa)
         {
-            var pessoaExistente = _context.Pessoas.Find(id);
-            if (pessoaExistente == null)
-            {
-                return NotFound();
-            }
-
-            if(pessoa.Nome != null)
-            {
-                pessoaExistente.Nome = pessoa.Nome;
-            }
-            if(pessoa.Biografia != null)
-            {
-                pessoaExistente.Biografia = pessoa.Biografia;
-            }
-            if(pessoa.DataNascimento != null)
-            {
-                pessoaExistente.DataNascimento = (DateOnly)pessoa.DataNascimento;
-            }
-            if(pessoa.Nacionalidade != null)
-            {
-                pessoaExistente.Nacionalidade = pessoa.Nacionalidade;
-            }
-            if(pessoa.FotoUrl != null)
-            {
-                pessoaExistente.FotoUrl = pessoa.FotoUrl;
-            }
-
-            _context.SaveChanges();
-            return Ok(pessoaExistente);
+            _pessoaService.AtualizarPessoa(id, pessoa);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeletarPessoa(int id)
         {
-            var pessoaExistente = _context.Pessoas.Find(id);
-            if (pessoaExistente == null)
-            {
-                return NotFound();
-            }
-
-            _context.Pessoas.Remove(pessoaExistente);
-            _context.SaveChanges();
+            _pessoaService.DeletarPessoa(id);
             return NoContent();
         }
     }

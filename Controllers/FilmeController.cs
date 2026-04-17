@@ -30,16 +30,22 @@ namespace CineRank.Controllers
         }
 
         [HttpGet]
-        public IActionResult ListarFilmes()
+        public IActionResult ListarFilmes(
+            [FromQuery] string ordem = "desc",
+             [FromQuery] int pagina = 1,
+              [FromQuery] int quantidade = 10)
         {
-            var filmes = _filmeService.ListarFilmes();
+            var filmes = _filmeService.ListarFilmes(ordem, pagina, quantidade);
             return Ok(filmes);
         }
 
         [HttpGet("ranking")]
-        public IActionResult ObterRankingFilmes([FromQuery] string ordem = "desc")
+        public IActionResult ObterRankingFilmes(
+            [FromQuery] string ordem = "desc",
+             [FromQuery] int pagina = 1,
+              [FromQuery] int quantidade = 10)
         {
-            var filmes = _filmeService.ListarFilmes(ordem);
+            var filmes = _filmeService.ListarFilmes(ordem, pagina, quantidade);
             return Ok(filmes);
         }
 

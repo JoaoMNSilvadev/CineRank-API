@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<FilmeService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AvaliacaoService>();
+builder.Services.AddScoped<AuthService>();
 
 // 3. Configuração do CORS
 builder.Services.AddCors(options =>

@@ -27,7 +27,7 @@ namespace CineRank.Controllers
             _context.SaveChanges();
             return CreatedAtAction(nameof(ObterGeneroPorId),
             new{ id = novoGenero.Id},
-             novoGenero); ;
+             novoGenero); 
 
         }
 

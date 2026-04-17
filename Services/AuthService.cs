@@ -1,4 +1,5 @@
 using CineRank.Data;
+using CineRank.DTOs;
 using CineRank.Models;
 
 namespace CineRank.Services
@@ -12,7 +13,7 @@ namespace CineRank.Services
             _dbContext = dbContext;
         }
 
-        public Usuario? Login(string email, string senha)
+        public LoginResponseDTO? Login(string email, string senha)
         {
             var usuario = _dbContext.Usuarios.
             FirstOrDefault(u => u.Email == email);
@@ -24,7 +25,12 @@ namespace CineRank.Services
             {
                 return null;
             }
-            return usuario;
+            return new LoginResponseDTO
+            {
+                Id = usuario.Id,
+                Nome = usuario.Nome,
+                Email = usuario.Email
+            };
 
         }
     }

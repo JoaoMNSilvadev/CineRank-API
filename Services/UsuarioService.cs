@@ -102,12 +102,12 @@ namespace CineRank.Services
                 throw new KeyNotFoundException("Usuário não encontrado.");
             }
 
-            if (usuario.Senha != senhaDTO.SenhaAtual)
+            if (!BCrypt.Net.BCrypt.Verify(senhaDTO.SenhaAtual, usuario.Senha))
             {
                 throw new ArgumentException("A senha atual está incorreta.");
             }
 
-            usuario.Senha = senhaDTO.NovaSenha;
+            usuario.Senha = BCrypt.Net.BCrypt.HashPassword(senhaDTO.NovaSenha);
             _context.SaveChanges();
         }
 

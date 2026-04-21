@@ -25,9 +25,11 @@ namespace CineRank.Services
             var query = _context.Pessoas
                 .Select(p => new PessoaSaidaDTO
                 {
+                    Id = p.Id,
                     Nome = p.Nome,
-                    DataNascimento = p.DataNascimento,
                     Biografia = p.Biografia,
+                    DataNascimento = p.DataNascimento,
+                    Nacionalidade = p.Nacionalidade,
                     FotoUrl = p.FotoUrl
                 });
 

@@ -2,6 +2,7 @@ using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
 using CineRank.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
@@ -18,6 +19,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult CriarPessoa(PessoaCreateDTO pessoa)
         {
             var novaPessoa = _pessoaService.CriarPessoa(pessoa);
@@ -26,6 +28,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ListarPessoas([FromQuery] int pagina = 1, [FromQuery] int quantidade = 10)
         {
             var pessoas = _pessoaService.ListarPessoas(pagina, quantidade);
@@ -33,17 +36,15 @@ namespace CineRank.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public IActionResult ObterPessoaPorId(int id)
         {
             var pessoa = _pessoaService.ObterPessoaPorId(id);
-            if (pessoa == null)
-            {
-                return NotFound();
-            }
             return Ok(pessoa);
         }
 
         [HttpGet("buscar")]
+        [AllowAnonymous]
         public IActionResult BuscarPessoas(string nome)
         {
             var pessoas = _pessoaService.BuscarPessoas(nome);
@@ -51,6 +52,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult AtualizarPessoa(int id, PessoaUpdateDTO pessoa)
         {
             _pessoaService.AtualizarPessoa(id, pessoa);
@@ -58,6 +60,7 @@ namespace CineRank.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeletarPessoa(int id)
         {
             _pessoaService.DeletarPessoa(id);

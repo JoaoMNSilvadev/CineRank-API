@@ -1,5 +1,6 @@
 using CineRank.DTOs;
 using CineRank.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
@@ -16,13 +17,16 @@ namespace CineRank.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult CriarFilme(FilmeCreateDTO filme)
         {
             var novoFilme = _filmeService.CriarFilme(filme);
             return CreatedAtAction(nameof(ObterFilmePorId), new { id = novoFilme.Id }, novoFilme);
         }
 
+
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public IActionResult ObterFilmePorId(int id)
         {
             var filme = _filmeService.BuscarFilmePorId(id);
@@ -30,6 +34,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ListarFilmes(
             [FromQuery] string ordem = "desc",
              [FromQuery] int pagina = 1,
@@ -40,6 +45,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet("ranking")]
+        [AllowAnonymous]
         public IActionResult ObterRankingFilmes(
             [FromQuery] string ordem = "desc",
              [FromQuery] int pagina = 1,
@@ -50,6 +56,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet("buscar")]
+        [AllowAnonymous]
         public IActionResult BuscarFilmes(string nome)
         {
             var filmes = _filmeService.BuscarFilmesPorTitulo(nome);
@@ -57,6 +64,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult AtualizarFilme(int id, FilmeUpdateDTO filme)
         {
                 _filmeService.AtualizarFilme(id, filme);
@@ -64,6 +72,7 @@ namespace CineRank.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeletarFilme(int id)
         {
             _filmeService.DeletarFilme(id);

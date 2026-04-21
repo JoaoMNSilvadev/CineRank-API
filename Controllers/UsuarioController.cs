@@ -1,5 +1,6 @@
 using CineRank.DTOs;
 using CineRank.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
@@ -16,6 +17,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult CriarUsuario(UsuarioCreateDTO usuarioDto)
         {
            var novoUsuario = _usuarioService.CriarUsuario(usuarioDto);
@@ -23,6 +25,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult ListarUsuarios()
         {
             var usuarios = _usuarioService.ListarUsuarios();
@@ -30,6 +33,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public IActionResult BuscarUsuarioPorId(int id)
         {
                 var usuario = _usuarioService.BuscarUsuarioPorId(id);
@@ -37,6 +41,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize]
         public IActionResult AtualizarUsuario(int id, UsuarioUpdateDTO usuarioDTO)
         {
                 _usuarioService.AtualizarUsuario(id, usuarioDTO);
@@ -45,6 +50,7 @@ namespace CineRank.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public IActionResult DeletarUsuario(int id)
         {
                 _usuarioService.DeletarUsuario(id);
@@ -52,11 +58,20 @@ namespace CineRank.Controllers
         }
 
        [HttpPut("trocar-senha/{id}")]
-public IActionResult TrocarSenha(int id, UsuarioTrocarSenhaDTO trocarSenhaDTO)
-{
+       [Authorize]
+        public IActionResult TrocarSenha(int id, UsuarioTrocarSenhaDTO trocarSenhaDTO)
+        {
         _usuarioService.TrocarSenha(id, trocarSenhaDTO);
         return Ok(new { message = "Senha alterada com sucesso!" });
-}
+        }
+
+        [HttpPatch("{id}/role")]
+        [Authorize (Roles = "Admin")]
+        public IActionResult AlterarRole(int id, [FromBody] string novaRole)
+        {
+            _usuarioService.AlterarRole(id, novaRole);
+            return Ok(new { message = "Role alterada com sucesso!" });
+        }
 
     }
 }

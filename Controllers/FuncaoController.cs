@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CineRank.Data;
 using CineRank.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CineRank.Controllers
 {
@@ -15,16 +16,17 @@ namespace CineRank.Controllers
             _context = context;
         }
 
-        // Listar todas as funções (Ator, Diretor, etc)
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Listar()
         {
             var funcoes = _context.Funcoes.ToList();
             return Ok(funcoes);
         }
 
-        // Cadastrar uma nova função
+        
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Criar(string nome)
         {
             if (string.IsNullOrWhiteSpace(nome))
@@ -37,8 +39,9 @@ namespace CineRank.Controllers
             return Ok(novaFuncao);
         }
 
-        // Deletar uma função
+        
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Deletar(int id)
         {
             var funcao = _context.Funcoes.Find(id);

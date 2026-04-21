@@ -1,6 +1,7 @@
 using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
@@ -17,6 +18,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult CriarGenero(GeneroCreateDTO genero)
         {
             var novoGenero = new Genero
@@ -32,6 +34,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ListarGeneros()
         {
             var generos = _context.Generos.ToList();
@@ -39,6 +42,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public IActionResult ObterGeneroPorId(int id)
         {
             var genero = _context.Generos.Find(id);
@@ -50,6 +54,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult AtualizarGenero(int id, GeneroCreateDTO genero)
         {
             var generoExistente = _context.Generos.Find(id);
@@ -64,6 +69,7 @@ namespace CineRank.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeletarGenero(int id)
         {
             var generoExistente = _context.Generos.Find(id);

@@ -1,5 +1,6 @@
 using CineRank.DTOs;
 using CineRank.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
@@ -16,6 +17,7 @@ namespace CineRank.Controllers
         }
 
     [HttpPost]
+    [Authorize]
     public IActionResult AdicionarAvaliacao(AvaliacaoCreateDTO dto)
     {
         _avaliacaoService.AdicionarAvaliacao(dto);
@@ -23,14 +25,16 @@ namespace CineRank.Controllers
     }
    
      [HttpPatch("{usuarioId}/{filmeId}")]
+     [Authorize]
         public IActionResult AtualizarAvaliacao(int usuarioId, int filmeId, AvaliacaoUpdateDTO dto)
         {
            
                 _avaliacaoService.AtualizarAvaliacao(usuarioId, filmeId, dto);
                 return NoContent();
             }
-            
+
         [HttpGet("{usuarioId}/{filmeId}")]
+        [Authorize]    
         public IActionResult ObterAvaliacao(int usuarioId, int filmeId)
         {
             var avaliacao = _avaliacaoService.ObterMinhaAvaliacao(usuarioId, filmeId);

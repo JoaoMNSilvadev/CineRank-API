@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CineRank.Models;
 using CineRank.Data;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,8 +14,8 @@ public class CreditoController : ControllerBase
         _context = context;
     }
 
-    // Adicionar um crédito (Vincular Pessoa ao Filme com uma Função)
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public IActionResult AdicionarCredito(int filmeId, int pessoaId, int funcaoId)
     {
         // Verifica se a combinação já existe para não duplicar
@@ -36,8 +37,8 @@ public class CreditoController : ControllerBase
         return Ok("Crédito adicionado com sucesso!");
     }
 
-    // Remover um crédito
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public IActionResult RemoverCredito(int id)
     {
         var credito = _context.Creditos.Find(id);

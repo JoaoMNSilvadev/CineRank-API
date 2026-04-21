@@ -1,6 +1,7 @@
 using CineRank.Data;
 using CineRank.DTOs;
 using CineRank.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
@@ -17,6 +18,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult CriarPlataforma(PlataformaCreateDTO plataforma)
         {
             var novaPlataforma = new Plataforma
@@ -32,6 +34,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ListarPlataformas()
         {
             var plataformas = _context.Plataformas.ToList();
@@ -39,6 +42,7 @@ namespace CineRank.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public IActionResult ObterPlataformaPorId(int id)
         {
             var plataforma = _context.Plataformas.Find(id);
@@ -50,6 +54,7 @@ namespace CineRank.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult AtualizarPlataforma(int id, PlataformaUpdateDTO plataforma)
         {
             var plataformaExistente = _context.Plataformas.Find(id);
@@ -72,6 +77,7 @@ namespace CineRank.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult ExcluirPlataforma(int id)
         {
             var plataforma = _context.Plataformas.Find(id);

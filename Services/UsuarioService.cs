@@ -111,6 +111,24 @@ namespace CineRank.Services
             _context.SaveChanges();
         }
 
+        public void AlterarRole(int id, string novaRole)
+        {
+
+            if (novaRole != "User" && novaRole != "Admin")
+            {
+                throw new ArgumentException("Role inválida. As opções válidas são 'User' e 'Admin'.");
+            }
+
+            var usuario = _context.Usuarios.Find(id);
+            if (usuario == null)
+            {
+                throw new KeyNotFoundException("Usuário não encontrado.");
+            }
+
+            usuario.Role = novaRole;
+            _context.SaveChanges();
+        }
+
 
     }
 }

@@ -18,14 +18,8 @@ namespace CineRank.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginDTO loginDTO)
         {
-            var resultado = _authService.Login(loginDTO.Email, loginDTO.Senha);
-            if (resultado == null)
-            {
-                return Unauthorized(new { message = "Email ou senha inválidos." });
-            }
-            return Ok(new {
-                 message = "Login realizado com sucesso.", usuario = resultado
-                 });
+           var token = _authService.Login(loginDTO.Email, loginDTO.Senha);
+            return Ok(new { token });
 
         }
     }

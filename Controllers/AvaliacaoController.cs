@@ -2,6 +2,7 @@ using CineRank.DTOs;
 using CineRank.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CineRank.Controllers
 {
@@ -20,23 +21,25 @@ namespace CineRank.Controllers
     [Authorize]
     public IActionResult AdicionarAvaliacao(AvaliacaoCreateDTO dto)
     {
-        _avaliacaoService.AdicionarAvaliacao(dto);
+        var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        _avaliacaoService.AdicionarAvaliacao(usuarioId, dto);
         return Ok(new { message = "Avaliação adicionada com sucesso." });
     }
    
-     [HttpPatch("{usuarioId}/{filmeId}")]
+     [HttpPatch("{filmeId}")]
      [Authorize]
-        public IActionResult AtualizarAvaliacao(int usuarioId, int filmeId, AvaliacaoUpdateDTO dto)
+        public IActionResult AtualizarAvaliacao(int filmeId, AvaliacaoUpdateDTO dto)
         {
-           
-                _avaliacaoService.AtualizarAvaliacao(usuarioId, filmeId, dto);
-                return NoContent();
-            }
+            var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            _avaliacaoService.AtualizarAvaliacao(usuarioId, filmeId, dto);
+            return NoContent();
+        }
 
-        [HttpGet("{usuarioId}/{filmeId}")]
+        [HttpGet("{filmeId}")]
         [Authorize]    
-        public IActionResult ObterAvaliacao(int usuarioId, int filmeId)
+        public IActionResult ObterAvaliacao(int filmeId)
         {
+            var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var avaliacao = _avaliacaoService.ObterMinhaAvaliacao(usuarioId, filmeId);
             if (avaliacao == null)
             {

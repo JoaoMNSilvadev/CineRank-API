@@ -24,8 +24,16 @@ public class AvaliacaoService
             return Math.Round(calculo, 2);
         }
 
-   public void AdicionarAvaliacao(AvaliacaoCreateDTO dto)
+   public void AdicionarAvaliacao(int usuarioId, AvaliacaoCreateDTO dto)
         {
+            var avaliacaoExistente = _context.Avaliacoes
+                .FirstOrDefault(a => a.UsuarioId == usuarioId && a.FilmeId == dto.FilmeId);
+
+            if (avaliacaoExistente != null)
+            {
+                throw new ArgumentException("Você já avaliou este filme.");
+            }
+
             double notaFinal = CalcularNotaFinal(
                 dto.NotaHistoria,
                 dto.NotaEmocao,
@@ -34,10 +42,9 @@ public class AvaliacaoService
                 dto.NotaVisual
             );
 
-           
                 var novaAvaliacao = new Avaliacao
                 {
-                    UsuarioId    = dto.UsuarioId,
+                    UsuarioId    = usuarioId,
                     FilmeId      = dto.FilmeId,
                     NotaHistoria = dto.NotaHistoria,
                     NotaEmocao   = dto.NotaEmocao,
@@ -47,7 +54,7 @@ public class AvaliacaoService
                     NotaFinal    = notaFinal,
                 };
                 _context.Avaliacoes.Add(novaAvaliacao);
-            
+                
 
             _context.SaveChanges();
         }

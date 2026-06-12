@@ -27,9 +27,10 @@ namespace CineRank.Middleware
 
         int statusCode = exception switch
         {
-            ArgumentException    => StatusCodes.Status400BadRequest,
-            KeyNotFoundException => StatusCodes.Status404NotFound,
-            _                    => StatusCodes.Status500InternalServerError
+            ArgumentException           => StatusCodes.Status400BadRequest,
+            KeyNotFoundException        => StatusCodes.Status404NotFound,
+            UnauthorizedAccessException => StatusCodes.Status403Forbidden,
+            _                           => StatusCodes.Status500InternalServerError
         };
 
         context.Response.StatusCode = statusCode;

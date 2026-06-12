@@ -20,38 +20,12 @@ namespace CineRank.Services
             if (quantidade < 1) quantidade = 10;
             if (quantidade > 50) quantidade = 50;
 
-            var query = _context.Filmes
-                .Include(f => f.Genero)
-                .Include(f => f.Avaliacoes)
-                .Include(f => f.Creditos!)
-                    .ThenInclude(c => c.Pessoa)
-                .Include(f => f.Creditos!)
-                    .ThenInclude(c => c.Funcao)
-                .Include(f => f.Plataformas)
-                .Select(f => new FilmeSaidaDTO
-                {
-                    Id              = f.Id,
-                    Titulo          = f.Titulo,
-                    Sinopse         = f.Sinopse,
-                    CapaUrl         = f.CapaUrl,
-                    AnoLancamento   = f.AnoLancamento,
-                    Genero          = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
-                    NotaMedia       = (f.Avaliacoes != null && f.Avaliacoes.Any())
-                                       ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1)
-                                       : 0,
-                    Creditos = f.Creditos!.Select(c => new FilmeCreditoDTO
-                    {
-                        PessoaId   = c.PessoaId,
-                        NomePessoa = c.Pessoa!.Nome,
-                        FuncaoId   = c.FuncaoId,
-                        NomeFuncao = c.Funcao!.Nome
-                    }).ToList(),
-                    PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
-                });
+                var query = _context.Filmes
+                    .AsNoTracking();
 
                 query = ordem.ToLower() == "asc"
-                   ? query.OrderBy(f => f.NotaMedia)
-                   : query.OrderByDescending(f => f.NotaMedia);
+                    ? query.OrderBy(f => f.Avaliacoes.Any() ? f.Avaliacoes.Average(a => a.NotaFinal) : 0)
+                    : query.OrderByDescending(f => f.Avaliacoes.Any() ? f.Avaliacoes.Average(a => a.NotaFinal) : 0);
 
                 int total = query.Count();
                 int totalPaginas = (int)Math.Ceiling(total / (double)quantidade);
@@ -59,6 +33,26 @@ namespace CineRank.Services
                 var dados = query
                 .Skip((pagina - 1) * quantidade)
                 .Take(quantidade)
+                    .Select(f => new FilmeSaidaDTO
+                    {
+                        Id = f.Id,
+                        Titulo = f.Titulo,
+                        Sinopse = f.Sinopse,
+                        CapaUrl = f.CapaUrl,
+                        AnoLancamento = f.AnoLancamento,
+                        Genero = f.Genero != null ? f.Genero.NomeGenero : "Sem Gênero",
+                        NotaMedia = (f.Avaliacoes != null && f.Avaliacoes.Any())
+                            ? Math.Round(f.Avaliacoes.Average(a => a.NotaFinal), 1)
+                            : 0,
+                        Creditos = f.Creditos!.Select(c => new FilmeCreditoDTO
+                        {
+                            PessoaId = c.PessoaId,
+                            NomePessoa = c.Pessoa!.Nome,
+                            FuncaoId = c.FuncaoId,
+                            NomeFuncao = c.Funcao!.Nome
+                        }).ToList(),
+                        PlataformaNomes = f.Plataformas!.Select(p => p.NomePlataforma).ToList()
+                    })
                 .ToList();
 
                 return new PaginacaoDTO<FilmeSaidaDTO>

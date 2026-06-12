@@ -5,8 +5,6 @@ namespace CineRank.DTOs
     public class AvaliacaoCreateDTO
     {
         [Required]
-        public int UsuarioId { get; set; }
-        [Required]
         public int FilmeId { get; set; }
         [Range(0, 10, ErrorMessage = "A nota deve estar entre 0 e 10.")]
         public Double NotaHistoria { get; set; }

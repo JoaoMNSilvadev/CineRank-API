@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using CineRank.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AvaliacaoService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PessoaService>();
+builder.Services.AddScoped<FavoritoService>();
 
 // 3. Configuração do CORS
 builder.Services.AddCors(options =>
@@ -81,6 +83,28 @@ builder.Services.AddSwaggerGen(options =>
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var adminEmail = builder.Configuration["SeedAdmin:Email"] ?? "admin@cinerank.local";
+    var adminNome = builder.Configuration["SeedAdmin:Nome"] ?? "Administrador";
+    var adminSenha = builder.Configuration["SeedAdmin:Senha"] ?? "Admin@123";
+    var adminRole = builder.Configuration["SeedAdmin:Role"] ?? "Admin";
+
+    if (!context.Usuarios.Any(usuario => usuario.Email == adminEmail))
+    {
+        context.Usuarios.Add(new Usuario
+        {
+            Nome = adminNome,
+            Email = adminEmail,
+            Senha = BCrypt.Net.BCrypt.HashPassword(adminSenha),
+            Role = adminRole
+        });
+
+        context.SaveChanges();
+    }
+}
 
 // 5. Configura o pipeline de requisições HTTP
 if (app.Environment.IsDevelopment())

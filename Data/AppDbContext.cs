@@ -18,6 +18,32 @@ namespace CineRank.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Funcao> Funcoes { get; set; }
         public DbSet<Credito> Creditos { get; set; }
+        public DbSet<Favorito> Favoritos { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Favorito>(entity =>
+            {
+                entity.HasIndex(f => new { f.UsuarioId, f.FilmeId }).IsUnique();
+
+                entity.HasOne(f => f.Usuario)
+                    .WithMany()
+                    .HasForeignKey(f => f.UsuarioId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(f => f.Filme)
+                    .WithMany()
+                    .HasForeignKey(f => f.FilmeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Avaliacao>(entity =>
+            {
+                entity.HasIndex(a => new { a.UsuarioId, a.FilmeId }).IsUnique();
+            });
+        }
 
 
     }

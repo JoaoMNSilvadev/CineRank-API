@@ -2,6 +2,7 @@ using CineRank.DTOs;
 using CineRank.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CineRank.Controllers
 {
@@ -21,7 +22,7 @@ namespace CineRank.Controllers
         public IActionResult CriarUsuario(UsuarioCreateDTO usuarioDto)
         {
            var novoUsuario = _usuarioService.CriarUsuario(usuarioDto);
-            return CreatedAtAction(nameof(BuscarUsuarioPorId), new { id = novoUsuario.Id }, novoUsuario);
+            return CreatedAtAction(nameof(BuscarMeuUsuario), new { }, novoUsuario);
         }
 
         [HttpGet]
@@ -32,37 +33,41 @@ namespace CineRank.Controllers
             return Ok(usuarios);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("me")]
         [Authorize]
-        public IActionResult BuscarUsuarioPorId(int id)
+        public IActionResult BuscarMeuUsuario()
         {
-                var usuario = _usuarioService.BuscarUsuarioPorId(id);
-                return Ok(usuario);
+            var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var usuario = _usuarioService.BuscarUsuarioPorId(usuarioId);
+            return Ok(usuario);
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("me")]
         [Authorize]
-        public IActionResult AtualizarUsuario(int id, UsuarioUpdateDTO usuarioDTO)
+        public IActionResult AtualizarUsuario(UsuarioUpdateDTO usuarioDTO)
         {
-                _usuarioService.AtualizarUsuario(id, usuarioDTO);
-                return NoContent();
+            var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            _usuarioService.AtualizarUsuario(usuarioId, usuarioDTO);
+            return NoContent();
 
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("me")]
         [Authorize]
-        public IActionResult DeletarUsuario(int id)
+        public IActionResult DeletarUsuario()
         {
-                _usuarioService.DeletarUsuario(id);
-                return NoContent();
+            var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            _usuarioService.DeletarUsuario(usuarioId);
+            return NoContent();
         }
 
-       [HttpPut("trocar-senha/{id}")]
+       [HttpPut("trocar-senha/me")]
        [Authorize]
-        public IActionResult TrocarSenha(int id, UsuarioTrocarSenhaDTO trocarSenhaDTO)
+        public IActionResult TrocarSenha(UsuarioTrocarSenhaDTO trocarSenhaDTO)
         {
-        _usuarioService.TrocarSenha(id, trocarSenhaDTO);
-        return Ok(new { message = "Senha alterada com sucesso!" });
+            var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            _usuarioService.TrocarSenha(usuarioId, trocarSenhaDTO);
+            return Ok(new { message = "Senha alterada com sucesso!" });
         }
 
         [HttpPatch("{id}/role")]

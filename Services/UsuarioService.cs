@@ -44,6 +44,12 @@ namespace CineRank.Services
             {
                 throw new KeyNotFoundException("Usuário não encontrado.");
             }
+
+            if (usuarioDTO.Email != null && _context.Usuarios.Any(u => u.Email == usuarioDTO.Email && u.Id != id))
+            {
+                throw new ArgumentException("O email já está em uso por outro usuário.");
+            }
+
             if (usuarioDTO.Nome != null)
                 usuarioExistente.Nome = usuarioDTO.Nome;
             if (usuarioDTO.Email != null)

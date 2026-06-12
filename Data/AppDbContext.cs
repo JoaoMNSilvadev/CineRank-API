@@ -48,6 +48,11 @@ namespace CineRank.Data
             {
                 entity.HasIndex(a => new { a.UsuarioId, a.FilmeId }).IsUnique();
             });
+
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.HasIndex(u => u.Email).IsUnique();
+            });
         }
 
 

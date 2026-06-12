@@ -21,6 +21,10 @@ builder.Services.AddScoped<AvaliacaoService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PessoaService>();
 builder.Services.AddScoped<FavoritoService>();
+builder.Services.AddScoped<CreditoService>();
+builder.Services.AddScoped<GeneroService>();
+builder.Services.AddScoped<PlataformaService>();
+builder.Services.AddScoped<FuncaoService>();
 
 // 3. Configuração do CORS
 builder.Services.AddCors(options =>

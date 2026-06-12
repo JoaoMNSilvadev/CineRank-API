@@ -39,6 +39,11 @@ namespace CineRank.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<Credito>(entity =>
+            {
+                entity.HasIndex(c => new { c.FilmeId, c.PessoaId, c.FuncaoId }).IsUnique();
+            });
+
             modelBuilder.Entity<Avaliacao>(entity =>
             {
                 entity.HasIndex(a => new { a.UsuarioId, a.FilmeId }).IsUnique();

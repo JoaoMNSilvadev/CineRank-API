@@ -1,6 +1,5 @@
-using CineRank.Data;
 using CineRank.DTOs;
-using CineRank.Models;
+using CineRank.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,42 +9,33 @@ namespace CineRank.Controllers
     [Route("api/[controller]")]
     public class GenerosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly GeneroService _generoService;
 
-        public GenerosController(AppDbContext context)
+        public GenerosController(GeneroService generoService)
         {
-            _context = context;
+            _generoService = generoService;
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public IActionResult CriarGenero(GeneroCreateDTO genero)
         {
-            var novoGenero = new Genero
-            {
-                NomeGenero = genero.NomeGenero
-            };
-            _context.Generos.Add(novoGenero);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(ObterGeneroPorId),
-            new{ id = novoGenero.Id},
-             novoGenero); 
-
+            var novoGenero = _generoService.CriarGenero(genero);
+            return CreatedAtAction(nameof(ObterGeneroPorId), new { id = novoGenero.Id }, novoGenero);
         }
 
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ListarGeneros()
         {
-            var generos = _context.Generos.ToList();
-            return Ok(generos);
+            return Ok(_generoService.ListarGeneros());
         }
 
         [HttpGet("{id}")]
         [AllowAnonymous]
         public IActionResult ObterGeneroPorId(int id)
         {
-            var genero = _context.Generos.Find(id);
+            var genero = _generoService.ObterGeneroPorId(id);
             if (genero == null)
             {
                 return NotFound();
@@ -57,14 +47,12 @@ namespace CineRank.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult AtualizarGenero(int id, GeneroCreateDTO genero)
         {
-            var generoExistente = _context.Generos.Find(id);
+            var generoExistente = _generoService.AtualizarGenero(id, genero);
             if (generoExistente == null)
             {
                 return NotFound();
             }
 
-            generoExistente.NomeGenero = genero.NomeGenero;
-            _context.SaveChanges();
             return Ok(generoExistente);
         }
 
@@ -72,17 +60,13 @@ namespace CineRank.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult DeletarGenero(int id)
         {
-            var generoExistente = _context.Generos.Find(id);
-            if (generoExistente == null)
+            var removido = _generoService.DeletarGenero(id);
+            if (!removido)
             {
                 return NotFound();
             }
 
-            _context.Generos.Remove(generoExistente);
-            _context.SaveChanges();
             return NoContent();
         }
-
-
     }
 }

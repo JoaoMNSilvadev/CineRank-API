@@ -1,6 +1,5 @@
-using CineRank.Data;
 using CineRank.DTOs;
-using CineRank.Models;
+using CineRank.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,42 +9,33 @@ namespace CineRank.Controllers
     [Route("api/[controller]")]
     public class PlataformasController : ControllerBase
     {
-     private readonly AppDbContext _context;
+        private readonly PlataformaService _plataformaService;
 
-        public PlataformasController(AppDbContext context)
+        public PlataformasController(PlataformaService plataformaService)
         {
-            _context = context;
+            _plataformaService = plataformaService;
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public IActionResult CriarPlataforma(PlataformaCreateDTO plataforma)
         {
-            var novaPlataforma = new Plataforma
-            {
-                NomePlataforma = plataforma.NomePlataforma,
-                IconeUrl = plataforma.IconeUrl
-            };
-            _context.Plataformas.Add(novaPlataforma);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(ObterPlataformaPorId),
-             new { id = novaPlataforma.Id },
-              novaPlataforma);
+            var novaPlataforma = _plataformaService.CriarPlataforma(plataforma);
+            return CreatedAtAction(nameof(ObterPlataformaPorId), new { id = novaPlataforma.Id }, novaPlataforma);
         }
 
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ListarPlataformas()
         {
-            var plataformas = _context.Plataformas.ToList();
-            return Ok(plataformas);
+            return Ok(_plataformaService.ListarPlataformas());
         }
 
         [HttpGet("{id}")]
         [AllowAnonymous]
         public IActionResult ObterPlataformaPorId(int id)
         {
-            var plataforma = _context.Plataformas.Find(id);
+            var plataforma = _plataformaService.ObterPlataformaPorId(id);
             if (plataforma == null)
             {
                 return NotFound();
@@ -57,22 +47,11 @@ namespace CineRank.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult AtualizarPlataforma(int id, PlataformaUpdateDTO plataforma)
         {
-            var plataformaExistente = _context.Plataformas.Find(id);
+            var plataformaExistente = _plataformaService.AtualizarPlataforma(id, plataforma);
             if (plataformaExistente == null)
             {
                 return NotFound();
             }
-
-            if (plataforma.NomePlataforma != null)
-            {
-                plataformaExistente.NomePlataforma = plataforma.NomePlataforma;
-            }
-            if (plataforma.IconeUrl != null)
-            {
-                plataformaExistente.IconeUrl = plataforma.IconeUrl;
-            }
-
-            _context.SaveChanges();
             return Ok(plataformaExistente);
         }
 
@@ -80,14 +59,12 @@ namespace CineRank.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult ExcluirPlataforma(int id)
         {
-            var plataforma = _context.Plataformas.Find(id);
+            var plataforma = _plataformaService.ExcluirPlataforma(id);
             if (plataforma == null)
             {
                 return NotFound();
             }
 
-            _context.Plataformas.Remove(plataforma);
-            _context.SaveChanges();
             return Ok(plataforma);
         }
 

@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using CineRank.Data;
-using CineRank.Models;
+using CineRank.DTOs;
+using CineRank.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CineRank.Controllers
 {
@@ -9,33 +9,26 @@ namespace CineRank.Controllers
     [Route("api/[controller]")]
     public class FuncaoController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly FuncaoService _funcaoService;
 
-        public FuncaoController(AppDbContext context)
+        public FuncaoController(FuncaoService funcaoService)
         {
-            _context = context;
+            _funcaoService = funcaoService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Listar()
         {
-            var funcoes = _context.Funcoes.ToList();
-            return Ok(funcoes);
+            return Ok(_funcaoService.Listar());
         }
 
         
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public IActionResult Criar(string nome)
+        public IActionResult Criar(FuncaoCreateDTO dto)
         {
-            if (string.IsNullOrWhiteSpace(nome))
-                return BadRequest("O nome da função é obrigatório.");
-
-            var novaFuncao = new Funcao { Nome = nome };
-            _context.Funcoes.Add(novaFuncao);
-            _context.SaveChanges();
-
+            var novaFuncao = _funcaoService.Criar(dto);
             return Ok(novaFuncao);
         }
 
@@ -44,11 +37,8 @@ namespace CineRank.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Deletar(int id)
         {
-            var funcao = _context.Funcoes.Find(id);
+            var funcao = _funcaoService.Deletar(id);
             if (funcao == null) return NotFound();
-
-            _context.Funcoes.Remove(funcao);
-            _context.SaveChanges();
 
             return Ok("Função removida com sucesso.");
         }
